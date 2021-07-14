@@ -66,4 +66,5 @@ library
     -Wredundant-constraints
     -Wnoncanonical-monad-instances
   build-depends:
-      base              >= 4.8   && < 5
+        base >= 4.8 && < 5
+      , streamly >= 0.8.0 && < 0.9
