@@ -1,0 +1,4 @@
+packages: ./
+
+package streamly-shell
+  ghc-options: -Werror

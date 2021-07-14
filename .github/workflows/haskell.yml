@@ -1,0 +1,128 @@
+# packcheck-0.5.1
+# You can use any of the options supported by packcheck as environment
+# variables here.  See https://github.com/composewell/packcheck for all
+# options and their explanation.
+
+name: packcheck
+
+#-----------------------------------------------------------------------------
+# Events on which the build should be triggered
+#-----------------------------------------------------------------------------
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+
+#-----------------------------------------------------------------------------
+# Build matrix
+#-----------------------------------------------------------------------------
+
+jobs:
+  build:
+    name: >-
+      ${{ matrix.name }}
+      ${{ matrix.command }}
+      ${{ matrix.runner }}
+      ${{ matrix.ghc_version }}
+    env:
+      # ------------------------------------------------------------------------
+      # Common options
+      # ------------------------------------------------------------------------
+      # GHC_OPTIONS: "-Werror"
+      CABAL_REINIT_CONFIG: y
+      LC_ALL: C.UTF-8
+
+      STACK_UPGRADE: "y"
+
+      CABAL_CHECK_RELAX: y
+      CABAL_HACKAGE_MIRROR: hackage.haskell.org:http://hackage.fpcomplete.com
+
+      PACKCHECK_LOCAL_PATH: "./packcheck.sh"
+      PACKCHECK_GITHUB_URL: "https://raw.githubusercontent.com/composewell/packcheck"
+      PACKCHECK_GITHUB_COMMIT: "37bbe8a79ad5136e654e48e03ec519060a5b11e6"
+
+      BUILD: ${{ matrix.build }}
+      GHCVER: ${{ matrix.ghc_version }}
+      #RESOLVER: ${{ matrix.resolver }}
+      #CABAL_BUILD_OPTIONS: ${{ matrix.cabal_build_options }}
+      CABAL_PROJECT: ${{ matrix.cabal_project }}
+      #DISABLE_DOCS: ${{ matrix.disable_docs }}
+      DISABLE_SDIST_BUILD: ${{ matrix.disable_sdist_build }}
+      HLINT_OPTIONS: ${{ matrix.hlint_options }}
+      HLINT_TARGETS: ${{ matrix.hlint_targets }}
+
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: 8.10.4+sdist # sdist with cabal.project
+            ghc_version: 8.10.4
+            build: cabal-v2
+            runner: ubuntu-latest
+          - name: 8.10.4+Werror
+            ghc_version: 8.10.4
+            build: cabal-v2
+            cabal_project: cabal.project.Werror
+            runner: ubuntu-latest
+          - name: 8.10.4+macOS
+            ghc_version: 8.10.4
+            build: cabal-v2
+            disable_sdist_build: "y"
+            runner: macos-latest
+          - name: 8.8.4
+            ghc_version: 8.8.4
+            build: cabal-v2
+            runner: ubuntu-latest
+          - name: 8.6.5
+            ghc_version: 8.6.5
+            build: cabal-v2
+            runner: ubuntu-latest
+          - name: 8.4.4
+            ghc_version: 8.4.4
+            build: cabal-v2
+            runner: ubuntu-latest
+          - name: hlint
+            build: cabal-v2
+            hlint_options: "lint"
+            hlint_targets: "src test"
+            runner: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: haskell/actions/setup@v1
+      if: ${{ matrix.name != 'hlint' }}
+      with:
+        ghc-version: ${{ matrix.ghc_version }}
+        cabal-version: 3.2
+
+    - uses: actions/cache@v1
+      name: Restore cache ~/.cabal, ~/.stack, .stack-work, ~/.ghc, ~/.local
+      with:
+        path: |
+          ~/.cabal
+          ~/.stack
+          .stack-work
+          ~/.ghc
+          ~/.local
+        key: ${{ runner.os }}-${{ matrix.name }}
+
+    - name: Download packcheck
+      run: |
+        # If a custom stack-yaml is specified, replace the default with that
+        if test -e "$STACK_YAML"; then rm -f stack.yaml && ln -sv $STACK_YAML stack.yaml; else true; fi
+        unset STACK_YAML
+
+        # Get packcheck if needed
+        CURL=$(which curl)
+        PACKCHECK_URL=${PACKCHECK_GITHUB_URL}/${PACKCHECK_GITHUB_COMMIT}/packcheck.sh
+        if test ! -e "$PACKCHECK_LOCAL_PATH"; then $CURL -sL -o "$PACKCHECK_LOCAL_PATH" $PACKCHECK_URL; fi;
+        chmod +x $PACKCHECK_LOCAL_PATH
+
+    - name: Run packcheck
+      run: |
+        bash -c "$PACKCHECK_LOCAL_PATH $BUILD"

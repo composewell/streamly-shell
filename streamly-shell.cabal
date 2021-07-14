@@ -1,0 +1,69 @@
+cabal-version:       2.2
+name:                streamly-shell
+version:             0.1.0
+synopsis:            Shell programming using streams
+description:
+  This package provides a shell monad that supports shell like stateful
+  programming with global environment variables and execution of programs
+  from locations specified in the `PATH` environment variable.  You can
+  connect shell processes and Haskell functions seamlessly in the same
+  way as Unix pipes. You can find equivalents for most shell programming
+  constructs.
+  .
+  In addition to a native shell monad, this package also supports
+  interpreting scripts using external shells e.g. `sh`.
+homepage:            https://streamly.composewell.com
+bug-reports:         https://github.com/composewell/streamly-process/issues
+license:             Apache-2.0
+license-file:        LICENSE
+author:              Composewell Technologies
+maintainer:          streamly@composewell.com
+copyright:           Composewell Technologies
+category:            Streaming, System, Shell
+stability:           Experimental
+build-type:          Simple
+extra-source-files:
+  CHANGELOG.md
+  NOTICE
+  README.md
+  design/proposal.md
+source-repository head
+  type: git
+  location: https://github.com/composewell/streamly-shell
+
+common compile-options
+  default-language: Haskell2010
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Wunrecognised-warning-flags
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wredundant-constraints
+    -Wnoncanonical-monad-instances
+
+common optimization-options
+  ghc-options:
+    -O2
+    -fdicts-strict
+    -fspec-constr-recursive=16
+    -fmax-worker-args=16
+
+library
+  import: compile-options, optimization-options
+  hs-source-dirs: src
+  exposed-modules:
+    --  Streamly.System.Shell
+      Streamly.System.Sh
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Wunrecognised-warning-flags
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wredundant-constraints
+    -Wnoncanonical-monad-instances
+  build-depends:
+      base              >= 4.8   && < 5
