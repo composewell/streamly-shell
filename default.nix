@@ -54,14 +54,39 @@ let haskellPackages =
                             doHaddock = false;
                           });
 
+                    streamly-process =
+                      nixpkgs.haskell.lib.overrideCabal
+                        (super.callHackageDirect
+                          { pkg = "streamly-process";
+                            ver = "0.1.0";
+                            sha256 = "01nxisqfmn29fbirdsx71sfjp2rdqwrf469qyjcql2d11i1bxn94";
+                          } {})
+                          (old:
+                            { enableLibraryProfiling = false;
+                              doHaddock = false;
+                            });
+
                 };
         };
 
     drv = mkHaskellPackages true;
 
+    # A fake package to add some additional deps to the shell env
+    additionalDeps = drv.mkDerivation rec {
+              version = "0.1";
+              pname   = "streamly-shell-additional";
+              license = "BSD-3-Clause";
+
+              executableHaskellDepends = with drv; [
+                streamly
+                streamly-process
+              ];
+            };
+
     shell = drv.shellFor {
         packages = p:
           [ p.streamly-shell
+            additionalDeps
           ];
         doBenchmark = true;
         # Use a better prompt
