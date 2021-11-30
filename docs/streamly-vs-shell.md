@@ -1,3 +1,4 @@
+# Haskell streamly-shell vs bash
 XXX toBytes would write stderr to stderr itself just like unix pipes do.
 
 toBytes_ would discard stderr.
@@ -46,6 +47,11 @@ We can use with/via/to like Sh/bash modules to keep it consistent.
 * pipefail: exception propagation
 * set -e: exceptions by default in streamly
 * ! to disable pipefail?
+
+### Chaining commands
+
+* && => >>, do block
+* || => <|> (Alternative instance of IO)
 
 ### Equivalents
 
