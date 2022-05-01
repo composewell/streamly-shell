@@ -8,10 +8,10 @@
 --
 -- Use shell scripts in your Haskell programs, interfacing via standard input
 -- and output.  The functions in this module are just convenience wrappers over
--- "Streamly.System.Process" to run shell commands using "/bin/sh".
+-- "Streamly.System.Process" to run shell commands using "\/bin/sh".
 --
--- >>> src = srcWith Process.toBytes
--- >>> pipe = pipeWith Process.processBytes
+-- >>> src = Sh.srcWith Process.toBytes
+-- >>> pipe = Sh.pipeWith Process.processBytes
 -- >>> :{
 --   src "echo hello"
 -- & pipe "tr [a-z] [A-Z]"
@@ -41,40 +41,45 @@ import Streamly.Prelude (SerialT)
 -- >>> import qualified Streamly.Console.Stdio as Stdio
 -- >>> import qualified Streamly.Prelude as Stream
 -- >>> import qualified Streamly.System.Process as Process
+-- >>> import qualified Streamly.System.Sh as Sh
 -- >>> import qualified Streamly.Unicode.Stream as Unicode
 
 -- | A modifier for stream generation process APIs to generate streams from
--- shell scripts with "/bin/sh" as the shell interpreter.
---
--- >>> srcWith Process.toBytes "echo hello" & Stream.fold Stdio.write
--- hello
--- >>> srcWith Process.toChunks "echo hello" & Stream.fold Stdio.writeChunks
--- hello
+-- shell scripts with "\/bin/sh" as the shell interpreter. Defined as:
 --
 -- >>> srcWith f cmd = f "/bin/sh" ["-c", cmd]
+--
+-- Example usage:
+--
+-- >>> Sh.srcWith Process.toBytes "echo hello" & Stream.fold Stdio.write
+-- hello
+-- >>> Sh.srcWith Process.toChunks "echo hello" & Stream.fold Stdio.writeChunks
+-- hello
 --
 srcWith :: (FilePath -> [String] -> SerialT m a) -> String -> SerialT m a
 srcWith f cmd = f "/bin/sh" ["-c", cmd]
 
 -- | A modifier for stream transformation process APIs to transform streams
--- using shell scripts srcWith "/bin/sh" as the shell interpreter.
+-- using shell scripts with "\/bin/sh" as the shell interpreter. Defined as:
+--
+-- >>> pipeWith f cmd = f "/bin/sh" ["-c", cmd]
+--
+-- Example usage:
 --
 -- >>> :{
 --    Stream.fromList "hello"
 --  & Unicode.encodeLatin1
---  & pipeWith Process.processBytes "tr [a-z] [A-Z]"
+--  & Sh.pipeWith Process.processBytes "tr [a-z] [A-Z]"
 --  & Stream.fold Stdio.write
 --  :}
 --HELLO
 --
 -- >>> :{
 --    srcWith Process.toChunks "echo hello"
---  & pipeWith Process.processChunks "tr [a-z] [A-Z]"
+--  & Sh.pipeWith Process.processChunks "tr [a-z] [A-Z]"
 --  & Stream.fold Stdio.writeChunks
 --  :}
 --HELLO
---
--- >>> pipeWith f cmd = f "/bin/sh" ["-c", cmd]
 --
 pipeWith ::
        (FilePath -> [String] -> SerialT m a -> SerialT m b)
