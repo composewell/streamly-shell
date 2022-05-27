@@ -2,6 +2,7 @@
 .github/workflows/haskell.yml
 .gitignore
 appveyor.yml
+cabal.project.user
 cabal.project.Werror
 default.nix
 stack.yaml

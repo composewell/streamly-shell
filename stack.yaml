@@ -1,6 +1,14 @@
-resolver: lts-18.1
+resolver: lts-18.18
 packages:
 - '.'
 
 extra-deps:
-- streamly-0.8.0@sha256:9784c80ee1ada51477520cabc4e92a0c76a6bb265f968a188f2fce818e7398e0,19654
+- unicode-data-0.3.0
+- git: https://github.com/composewell/streamly
+  commit: "cbccb7777792cb4bf8dd8716929f4e28ea6cf718"
+- git: https://github.com/composewell/streamly
+  commit: "cbccb7777792cb4bf8dd8716929f4e28ea6cf718"
+  subdirs:
+    - core
+- git: https://github.com/composewell/streamly-process
+  commit: "e8aef97965f3d89bb1d4e50564b69572db2e8a8a"
