@@ -114,8 +114,8 @@ overhead of a system call.
 
 * cd
 * pwd
-* getenv
-* setenv (export)
+* getenv -- in System.Environment
+* setenv (export) -- lookupEnv/setEnv in System.Environment
 
 ### Commands
 
