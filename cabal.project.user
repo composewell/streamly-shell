@@ -3,17 +3,17 @@ packages: streamly-shell.cabal
 source-repository-package
    type: git
    location: https://github.com/composewell/streamly.git
-   tag: e9d044d8e5be37e8a1c93d1db5ceeb9f5cdd54f8
+   tag: master
 
 source-repository-package
    type: git
    location: https://github.com/composewell/streamly.git
-   tag: e9d044d8e5be37e8a1c93d1db5ceeb9f5cdd54f8
+   tag: master
    subdir: core
 
 source-repository-package
    type: git
    location: https://github.com/composewell/streamly-process.git
-   tag: 8aad6350f6f6a66eb5cfd1e869ca43cbeba74eb3
+   tag: ad4cc5677d73a5fb3b995fc4577f26c8ac4d34b9
 
 jobs: 1
