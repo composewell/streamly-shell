@@ -1,4 +1,4 @@
-# packcheck-0.5.1
+# packcheck-0.6.0
 # You can use any of the options supported by packcheck as environment
 # variables here.  See https://github.com/composewell/packcheck for all
 # options and their explanation.
@@ -22,11 +22,7 @@ on:
 
 jobs:
   build:
-    name: >-
-      ${{ matrix.name }}
-      ${{ matrix.command }}
-      ${{ matrix.runner }}
-      ${{ matrix.ghc_version }}
+    name: ${{ matrix.name }}
     env:
       # ------------------------------------------------------------------------
       # Common options
@@ -42,7 +38,7 @@ jobs:
 
       PACKCHECK_LOCAL_PATH: "./packcheck.sh"
       PACKCHECK_GITHUB_URL: "https://raw.githubusercontent.com/composewell/packcheck"
-      PACKCHECK_GITHUB_COMMIT: "a68b7b9c7c21eef8ed273e67030efb1d4fec027c"
+      PACKCHECK_GITHUB_COMMIT: "v0.6.0"
 
       BUILD: ${{ matrix.build }}
       GHCVER: ${{ matrix.ghc_version }}
@@ -50,7 +46,8 @@ jobs:
       #CABAL_BUILD_OPTIONS: ${{ matrix.cabal_build_options }}
       CABAL_PROJECT: ${{ matrix.cabal_project }}
       #DISABLE_DOCS: ${{ matrix.disable_docs }}
-      DISABLE_SDIST_BUILD: ${{ matrix.disable_sdist_build }}
+      #DISABLE_SDIST_BUILD: ${{ matrix.disable_sdist_build }}
+      #DISABLE_SDIST_BUILD: "y"
       HLINT_OPTIONS: ${{ matrix.hlint_options }}
       HLINT_TARGETS: ${{ matrix.hlint_targets }}
       DOCTEST: ${{ matrix.doctest }}
@@ -60,57 +57,88 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: 8.10.7+sdist # sdist with cabal.project
-            ghc_version: 8.10.7
-            build: cabal-v2
-            cabal_project: cabal.project.user
-            runner: ubuntu-latest
-          - name: 8.10.7+Werror
-            ghc_version: 8.10.7
-            build: cabal-v2
-            cabal_project: cabal.project.Werror
-            runner: ubuntu-latest
-          - name: 8.10.7+macOS
-            ghc_version: 8.10.7
-            build: cabal-v2
-            cabal_project: cabal.project.user
-            disable_sdist_build: "y"
-            runner: macos-latest
-          - name: 8.8.4
-            ghc_version: 8.8.4
-            build: cabal-v2
-            cabal_project: cabal.project.user
-            runner: ubuntu-latest
-          - name: 8.6.5
-            ghc_version: 8.6.5
-            build: cabal-v2
-            cabal_project: cabal.project.user
-            runner: ubuntu-latest
-          - name: 8.4.4
-            ghc_version: 8.4.4
-            build: cabal-v2
-            cabal_project: cabal.project.user
-            runner: ubuntu-latest
-          - name: hlint
-            build: cabal-v2
-            hlint_options: "lint"
-            hlint_targets: "src"
-            runner: ubuntu-latest
+
           - name: doctest
             ghc_version: 9.2.2
             build: cabal-v2
             runner: ubuntu-latest
             cabal-version: 3.6
             doctest: "y"
+            cabal_project: cabal.project.user
+
+          - name: 9.4.2
+            ghc_version: 9.4.2
+            build: cabal-v2
+            runner: ubuntu-latest
+            cabal-version: 3.8.1.0
+            cabal_project: cabal.project.user
+            pack_options: >-
+              DISABLE_BENCH=y
+
+          - name: 9.2.2
+            ghc_version: 9.2.2
+            build: cabal-v2
+            runner: ubuntu-latest
+            cabal-version: 3.6
+            cabal_project: cabal.project.user
+
+          - name: 9.0.1
+            ghc_version: 9.0.1
+            build: cabal-v2
+            runner: ubuntu-latest
+            cabal-version: 3.2
+            cabal_project: cabal.project.user
+
+          - name: 8.10.7+sdist # sdist with cabal.project
+            ghc_version: 8.10.7
+            build: cabal-v2
+            runner: ubuntu-latest
+            cabal-version: 3.2
+            cabal_project: cabal.project.user
+
+          - name: 8.10.7+Werror
+            ghc_version: 8.10.7
+            build: cabal-v2
+            cabal_project: cabal.project.Werror
+            runner: ubuntu-latest
+            cabal-version: 3.2
+
+          - name: 8.10.7+macOS
+            ghc_version: 8.10.7
+            build: cabal-v2
+            runner: macos-latest
+            cabal-version: 3.2
+            cabal_project: cabal.project.user
+
+          - name: 8.8.4
+            ghc_version: 8.8.4
+            build: cabal-v2
+            runner: ubuntu-latest
+            cabal-version: 3.2
+            cabal_project: cabal.project.user
+
+          - name: 8.6.5
+            ghc_version: 8.6.5
+            build: cabal-v2
+            runner: ubuntu-latest
+            cabal-version: 3.2
+            cabal_project: cabal.project.user
+
+          - name: hlint
+            ghc_version: 8.10.7
+            build: cabal-v2
+            hlint_options: "lint"
+            hlint_targets: "src test Benchmark"
+            runner: ubuntu-latest
+            cabal-version: 3.2
+            cabal_project: cabal.project.user
 
     steps:
     - uses: actions/checkout@v2
 
     - uses: haskell/actions/setup@v1
-      if: ${{ matrix.name != 'hlint' }}
       with:
         ghc-version: ${{ matrix.ghc_version }}
-        cabal-version: 3.2
 
     - uses: actions/cache@v1
       name: Restore cache ~/.cabal, ~/.stack, .stack-work, ~/.ghc, ~/.local
