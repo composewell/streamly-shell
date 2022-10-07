@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ConstraintKinds #-}
 -- |
 -- Module      : Streamly.System.Sh
 -- Copyright   : (c) 2021 Composewell Technologies
@@ -46,12 +47,17 @@ module Streamly.System.Sh
 where
 
 import Control.Monad.Catch (MonadCatch)
+import Control.Monad.Catch (MonadThrow)
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Trans.Control (MonadBaseControl(..))
 import Data.Word (Word8)
+import Streamly.Data.Array.Unboxed (Array)
 import Streamly.Data.Fold (Fold)
-import Streamly.Prelude (SerialT, MonadAsync)
-import Streamly.Data.Array.Foreign (Array)
+import Streamly.Data.Stream (Stream)
 
 import qualified Streamly.Internal.System.Process as Process
+
+type MonadAsync m = (MonadIO m, MonadBaseControl IO m, MonadThrow m)
 
 -- The APIs are named/designed such that we can replace the sh module with
 -- another module for bash or any other shells without requiring API name
@@ -60,11 +66,12 @@ import qualified Streamly.Internal.System.Process as Process
 -- $setup
 -- >>> :set -XFlexibleContexts
 -- >>> :set -package streamly
+-- >>> :set -package streamly-core
 -- >>> :set -package streamly-process
 -- >>> import Data.Function ((&))
 -- >>> import qualified Streamly.Internal.Console.Stdio as Stdio
 -- >>> import qualified Streamly.Data.Fold as Fold
--- >>> import qualified Streamly.Prelude as Stream
+-- >>> import qualified Streamly.Data.Stream as Stream
 -- >>> import qualified Streamly.Internal.System.Process as Process
 -- >>> import qualified Streamly.System.Sh as Sh
 -- >>> import qualified Streamly.Unicode.Stream as Unicode
@@ -82,7 +89,7 @@ import qualified Streamly.Internal.System.Process as Process
 -- >>> streamWith Process.toChunks "echo hello" & Stdio.putChunks
 -- hello
 --
-streamWith :: (FilePath -> [String] -> SerialT m a) -> String -> SerialT m a
+streamWith :: (FilePath -> [String] -> Stream m a) -> String -> Stream m a
 streamWith f cmd = f "/bin/sh" ["-c", cmd]
 
 -- | A modifier for process running APIs in "Streamly.System.Process" to run
@@ -114,10 +121,10 @@ runWith f cmd = f "/bin/sh" ["-c", cmd]
 --
 -- /Internal/
 pipeWith ::
-       (FilePath -> [String] -> SerialT m a -> SerialT m b)
+       (FilePath -> [String] -> Stream m a -> Stream m b)
     -> String
-    -> SerialT m a
-    -> SerialT m b
+    -> Stream m a
+    -> Stream m b
 pipeWith f cmd = f "/bin/sh" ["-c", cmd]
 
 -- | @pipeChunks command input@ runs the executable with arguments specified by
@@ -147,7 +154,7 @@ pipeWith f cmd = f "/bin/sh" ["-c", cmd]
 -- /Pre-release/
 {-# INLINE pipeChunks #-}
 pipeChunks :: (MonadAsync m, MonadCatch m) =>
-    String -> SerialT m (Array Word8) -> SerialT m (Array Word8)
+    String -> Stream m (Array Word8) -> Stream m (Array Word8)
 pipeChunks = pipeWith Process.pipeChunks
 
 -- | Like 'pipeChunks' except that it works on a stream of bytes instead of
@@ -163,7 +170,7 @@ pipeChunks = pipeWith Process.pipeChunks
 -- /Pre-release/
 {-# INLINE pipeBytes #-}
 pipeBytes :: (MonadAsync m, MonadCatch m) =>
-    String -> SerialT m Word8 -> SerialT m Word8
+    String -> Stream m Word8 -> Stream m Word8
 pipeBytes = pipeWith Process.pipeBytes
 
 -- | Like 'pipeChunks' except that it works on a stream of chars instead of
@@ -179,7 +186,7 @@ pipeBytes = pipeWith Process.pipeBytes
 -- /Pre-release/
 {-# INLINE pipeChars #-}
 pipeChars :: (MonadAsync m, MonadCatch m) =>
-    String -> SerialT m Char -> SerialT m Char
+    String -> Stream m Char -> Stream m Char
 pipeChars = pipeWith Process.pipeChars
 
 -------------------------------------------------------------------------------
@@ -200,7 +207,7 @@ pipeChars = pipeWith Process.pipeChars
 --hello world
 --
 -- /Pre-release/
-toBytes :: (MonadAsync m, MonadCatch m) => String -> SerialT m Word8
+toBytes :: (MonadAsync m, MonadCatch m) => String -> Stream m Word8
 toBytes = streamWith Process.toBytes
 
 -- |
@@ -211,7 +218,7 @@ toBytes = streamWith Process.toBytes
 --hello world
 --
 -- /Pre-release/
-toChunks :: (MonadAsync m, MonadCatch m) => String -> SerialT m (Array Word8)
+toChunks :: (MonadAsync m, MonadCatch m) => String -> Stream m (Array Word8)
 toChunks = streamWith Process.toChunks
 
 -- |
@@ -222,13 +229,13 @@ toChunks = streamWith Process.toChunks
 --
 -- /Pre-release/
 {-# INLINE toChars #-}
-toChars :: (MonadAsync m, MonadCatch m) => String -> SerialT m Char
+toChars :: (MonadAsync m, MonadCatch m) => String -> Stream m Char
 toChars = streamWith Process.toChars
 
 -- |
 -- >>> toLines f = streamWith (Process.toLines f)
 --
--- >>> toLines Fold.toList "/bin/echo -e hello\\\\nworld" & Stream.toList
+-- >>> toLines Fold.toList "/bin/echo -e hello\\\\nworld" & Stream.fold Fold.toList
 -- ["hello","world"]
 --
 -- /Pre-release/
@@ -237,7 +244,7 @@ toLines ::
     (MonadAsync m, MonadCatch m)
     => Fold m Char a
     -> String       -- ^ Command
-    -> SerialT m a -- ^ Output Stream
+    -> Stream m a -- ^ Output Stream
 toLines f = streamWith (Process.toLines f)
 
 -- |
