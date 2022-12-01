@@ -14,6 +14,6 @@ source-repository-package
 source-repository-package
    type: git
    location: https://github.com/composewell/streamly-process.git
-   tag: 3ba7fd059f7fea64e8faf50dbcdb63ba82bcc018
+   tag: master
 
 jobs: 1
