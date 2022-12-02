@@ -7,13 +7,13 @@ extra-deps:
 - unicode-data-0.3.0
 - lockfree-queue-0.2.4
 - github: composewell/streamly
-  commit: "e061109f76ef37a288de0cafa37ea950c467cb82"
+  commit: "3f82f0035a7eb787cd9c037c0115d4630a46e069"
 - github: composewell/streamly
-  commit: "e061109f76ef37a288de0cafa37ea950c467cb82"
+  commit: "3f82f0035a7eb787cd9c037c0115d4630a46e069"
   subdirs:
     - core
 - github: composewell/streamly-process
-  commit: "fb45eedcd1320d552fb49048e1d733cbf5d46711"
+  commit: "49e5cc1ab30ad0fe8b69a9735c5ba26faa656a20"
 
 # Look at https://stackoverflow.com/questions/70045586/could-not-find-module-system-console-mintty-win32-when-compiling-test-framework
 flags:
