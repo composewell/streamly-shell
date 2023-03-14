@@ -1,17 +1,10 @@
 cabal-version:       2.2
 name:                streamly-shell
 version:             0.1.0
-synopsis:            Shell programming using streams
+synopsis:            Shell commands as streams
 description:
-  This package provides a shell monad that supports shell like stateful
-  programming with global environment variables and execution of programs
-  from locations specified in the `PATH` environment variable.  You can
-  connect shell processes and Haskell functions seamlessly in the same
-  way as Unix pipes. You can find equivalents for most shell programming
-  constructs.
-  .
-  In addition to a native shell monad, this package also supports
-  interpreting scripts using external shells e.g. `sh`.
+  A wrapper over Streamly.System.Command module to use `sh` as an
+  interpreter for command strings.
 homepage:            https://streamly.composewell.com
 bug-reports:         https://github.com/composewell/streamly-process/issues
 license:             Apache-2.0
@@ -21,6 +14,12 @@ maintainer:          streamly@composewell.com
 copyright:           Composewell Technologies
 category:            Streaming, System, Shell
 stability:           Experimental
+tested-with:         GHC==9.4.2
+                   , GHC==9.2.2
+                   , GHC==9.0.1
+                   , GHC==8.10.7
+                   , GHC==8.8.4
+                   , GHC==8.6.5
 build-type:          Simple
 extra-source-files:
   CHANGELOG.md
@@ -54,7 +53,6 @@ library
   import: compile-options, optimization-options
   hs-source-dirs: src
   exposed-modules:
-    --  Streamly.System.Shell
       Streamly.System.Sh
   ghc-options:
     -Wall
